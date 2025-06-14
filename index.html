@@ -7,20 +7,33 @@
     body {
       margin: 0;
       overflow: hidden;
-      background-color: #f0f0f0; /* 浅灰色背景，更适合观察颜色 */
+      /* 2. 将背景改为深灰色 */
+      background-color: #222222;
     }
     canvas {
       display: block;
+    }
+    /* 3. 为版权信息添加样式 */
+    #copyright {
+      position: absolute;
+      bottom: 15px;
+      width: 100%;
+      text-align: center;
+      color: #aaaaaa; /* 浅灰色文字，在深色背景上清晰可见 */
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 14px;
+      pointer-events: none; /* 让鼠标可以穿透文字，不影响3D操作 */
     }
   </style>
 </head>
 <body>
   <canvas id="canvas3d"></canvas>
 
-  <!-- 
-    1. 使用 importmap 来告诉浏览器 "three" 和 "three/addons/" 在哪里可以找到。
-       这使得我们的 import 语句更简洁。
-  -->
+  <!-- 版权信息元素 -->
+  <div id="copyright">
+    本项目由沈阳艺贝少儿美术教育开发
+  </div>
+
   <script type="importmap">
     {
       "imports": {
@@ -30,17 +43,15 @@
     }
   </script>
 
-  <!-- 
-    2. 主脚本的类型改为 "module"。
-       这允许我们使用 import 语句。
-  -->
   <script type="module">
-    // 3. 从 'three' 和 'three/addons/' 导入我们需要的模块
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-    // 场景、相机和渲染器设置 (这部分代码基本不变)
+    // 场景、相机和渲染器设置
     const scene = new THREE.Scene();
+    // 2. 同时设置场景的背景色，与CSS保持一致
+    scene.background = new THREE.Color(0x222222);
+
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.set(0, 15, 60);
 
@@ -49,7 +60,7 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
 
-    // 控制器 (注意：因为我们直接导入了 OrbitControls，所以这里不再需要 THREE. 前缀)
+    // 控制器
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
@@ -63,7 +74,7 @@
     dirLight.position.set(20, 40, 30);
     scene.add(ambientLight, dirLight);
 
-    // 孟塞尔数据
+    // 孟塞尔数据 (保持不变)
     const hueLabels = ['5R', '5Y', '5G', '5B', '5P'];
     const chromaMap = {
         '5R': [2, 5, 8, 10, 12, 12, 10, 8, 6, 4],
@@ -73,7 +84,7 @@
         '5P': [2, 4, 7, 9, 10, 9, 8, 6, 4, 2],
     };
 
-    // 创建色立体
+    // 创建色立体 (保持不变)
     const sphereRadius = 0.5;
     const radiusScale = 1.8;
     const heightScale = 2.2;
@@ -105,10 +116,26 @@
       }
     });
 
-    // 添加中性轴
+    // 1. 修改中性轴，添加从黑到白的渐变
     const axisHeight = 10 * heightScale;
     const neutralAxisGeom = new THREE.CylinderGeometry(0.25, 0.25, axisHeight, 12);
-    const neutralAxisMat = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.9 });
+    
+    // 创建顶点色
+    const positionAttribute = neutralAxisGeom.getAttribute('position');
+    const colors = [];
+    const color = new THREE.Color();
+    for (let i = 0; i < positionAttribute.count; i++) {
+        // 根据顶点的高度 (y值) 计算灰度值 (0到1)
+        const lightness = (positionAttribute.getY(i) + axisHeight / 2) / axisHeight;
+        color.setHSL(0, 0, lightness);
+        colors.push(color.r, color.g, color.b);
+    }
+    // 将计算出的颜色应用到几何体上
+    neutralAxisGeom.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+    
+    // 创建材质时，启用顶点色
+    const neutralAxisMat = new THREE.MeshStandardMaterial({ roughness: 0.9, vertexColors: true });
+    
     const neutralAxis = new THREE.Mesh(neutralAxisGeom, neutralAxisMat);
     neutralAxis.position.y = (5.5 - 5.5) * heightScale;
     scene.add(neutralAxis);
