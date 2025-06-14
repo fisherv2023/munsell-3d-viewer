@@ -8,8 +8,7 @@ An interactive 3D web application built with Three.js to visualize the Munsell c
 
 ---
 
-![项目截图](path/to/your/screenshot.png) 
-*(建议替换此处的图片为你项目的截图或GIF动图)*
+![项目截图](screenshot.png) 
 
 ## 🎨 在线演示 (Live Demo)
 
