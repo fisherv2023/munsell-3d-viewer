@@ -1,100 +1,116 @@
-# 孟塞尔色立体三维查看器 (Munsell 3D Viewer)
+# Munsell 3D Viewer
 
-[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-deployed-brightgreen)](https://fisherv2023.github.io/munsell-3d-viewer/)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live%20Demo-brightgreen)](https://fisherv2023.github.io/munsell-3d-viewer/)
 
-一个基于 Three.js 的交互式3D网页应用，用于可视化孟塞尔色立体。用户可以在三维空间中自由探索色相（Hue）、明度（Value）和彩度（Chroma）之间的关系。
+An interactive 3D web application built with Three.js to visualize the Munsell color solid. This version has been upgraded to feature **10 main hues** and a **dual-mode viewing system**, providing a richer and more practical tool for artists, designers, and color enthusiasts.
 
-An interactive 3D web application built with Three.js to visualize the Munsell color solid. It allows users to explore the relationships between hue, value, and chroma in a three-dimensional space.
+一个基于 Three.js 的交互式3D网页应用，用于可视化孟塞尔色立体。此版本已升级，包含 **10个主色相** 和 **双模式查看系统**，为艺术家、设计师和色彩爱好者提供了一个更丰富、更实用的工具。
 
 ---
 
-![项目截图](screenshot.png) 
+![Project Screenshot](screenshot.png)
 
+## 🎨 Live Demo (在线演示)
 
-## 🎨 在线演示 / Live Demo
+**[Click here to experience it live »](https://fisherv2023.github.io/munsell-3d-viewer/)**
+**[点击这里在线体验 »](https://fisherv2023.github.io/munsell-3d-viewer/)**
 
-**[点击这里在线体验 / Click here for Live Demo »](https://fisherv2023.github.io/munsell-3d-viewer/)**
+## ✨ Features (功能特性)
 
-## ✨ 功能特性 / Features
+*   🌟 **Expanded 10-Hue Model**
+    Visualizes the 10 main Munsell hues (5R, 5YR, 5Y, etc.) to show a more complete and accurate color solid, clearly illustrating the irregular shape of human color perception.
+    
+    🌟 **扩展的10色相模型**
+    可视化10个孟塞尔主色相（5R, 5YR, 5Y等），展示一个更完整、更准确的色立体，清晰地揭示了人类色彩感知的不规则形状。
 
--   **交互式3D视图**: 使用鼠标可以自由旋转、平移和缩放色立体模型。<br>
-    *Interactive 3D View*: Freely rotate, pan, and zoom the color solid model with your mouse.
+*   💡 **Dual-Mode Viewing (3D / Flat)**
+    A toggle switch at the bottom allows you to instantly switch between:
+    *   **On (3D):** A physically-based view with realistic lighting and shadows to perceive depth and form.
+    *   **Off (Flat):** A pure-color view with lighting disabled, perfect for accurate color assessment and study.
 
--   **准确的色彩表示**: 将孟塞尔系统中的色相、明度和彩度以三维坐标的形式（圆柱坐标系）精确地呈现在空间中。<br>
-    *Accurate Color Representation*: Precisely renders hue, value, and chroma from the Munsell system into 3D cylindrical coordinates.
+    💡 **双模式查看 (3D / Flat)**
+    底部的切换开关允许您在两种模式间即时切换：
+    *   **On (3D):** 基于物理的视图，拥有逼真的光照和阴影，便于感知深度和形态。
+    *   **Off (Flat):** 纯色视图，禁用了光照，非常适合进行精确的颜色评估和学习。
 
--   **渐变中性轴**: 中心轴以从黑到白的平滑渐变展示了明度（Value）的变化，作为视觉参考。<br>
-    *Gradient Neutral Axis*: The central axis displays a smooth black-to-white gradient, visually representing the Value scale as a reference.
+*   👆 **Interactive 3D Controls**
+    Freely rotate, pan, and zoom the model using your mouse or touch gestures.
+    
+    👆 **交互式3D控制**
+    使用鼠标或触摸手势自由地旋转、平移和缩放模型。
 
--   **深色主题**: 采用深灰色背景，以减少环境色对颜色感知的干扰，让色彩本身更加突出。<br>
-    *Dark Theme*: Utilizes a dark gray background to minimize ambient color interference and make the colors stand out.
+*   🌈 **Gradient Neutral Axis**
+    The central value scale features a smooth black-to-white gradient for a clear visual reference of lightness (Value).
+    
+    🌈 **渐变中性轴**
+    中心明度轴采用平滑的黑到白渐变，为明度（Value）提供了清晰的视觉参考。
 
--   **纯客户端渲染**: 无需后端服务，完全在浏览器中运行，部署简单。<br>
-    *Pure Client-Side Rendering*: Runs entirely in the browser with no backend required, making deployment simple.
+*   🌑 **Optimized Dark Theme**
+    The dark background minimizes visual interference, allowing for more accurate color perception.
 
--   **响应式设计**: 自动适应不同大小的浏览器窗口。<br>
-    *Responsive Design*: Automatically adapts to different browser window sizes.
+    🌑 **优化的深色主题**
+    深色背景最大限度地减少了视觉干扰，使颜色感知更准确。
 
-## 🛠️ 技术栈 / Technology Stack
+*   🚀 **Pure Client-Side & Responsive**
+    Runs entirely in the browser with no backend required. It automatically adapts to any screen size.
 
--   HTML5
--   CSS3
--   JavaScript (ES Modules)
--   Three.js
+    🚀 **纯客户端与响应式设计**
+    完全在浏览器中运行，无需后端。自动适应任何屏幕尺寸。
 
-## 🚀 如何在本地运行 / Getting Started
+## 🛠️ Technology Stack (技术栈)
 
-由于项目使用了 ES Modules，你不能直接通过 `file://` 协议在浏览器中打开 `index.html` 文件。你需要一个本地的 Web 服务器来运行它。
-<br>
-*Because this project uses ES Modules, you cannot open `index.html` directly in the browser via the `file://` protocol. You need a local web server to run it.*
+-   **HTML5**
+-   **CSS3**
+-   **JavaScript (ES Modules)**
+-   **Three.js**: The core 3D rendering library.
 
-1.  **克隆仓库 / Clone the repository**
+## 🚀 Getting Started (如何在本地运行)
+
+Since this project uses ES Modules, you cannot open the `index.html` file directly in your browser via the `file://` protocol. You need a local web server.
+由于本项目使用了 ES Modules，您不能直接通过 `file://` 协议在浏览器中打开 `index.html` 文件。您需要一个本地 Web 服务器来运行它。
+
+1.  **Clone the repository (克隆仓库)**
     ```bash
     git clone https://github.com/fisherv2023/munsell-3d-viewer.git
     ```
 
-2.  **进入项目目录 / Navigate to the project directory**
+2.  **Navigate to the project directory (进入项目目录)**
     ```bash
     cd munsell-3d-viewer
     ```
 
-3.  **启动本地服务器 / Start a local server** (Choose one method)
+3.  **Start a local server (启动本地服务器)** (choose one method / 任选一种方式)
 
-    *   **使用 Python / Using Python**:
-        (如果你的电脑安装了 Python 3 / If you have Python 3 installed)
+    *   **With Python:** If you have Python 3 installed, run:
+        (如果你的电脑安装了 Python 3，请运行：)
         ```bash
         python -m http.server
         ```
 
-    *   **使用 Node.js / Using Node.js**:
-        (如果你安装了 Node.js / If you have Node.js installed)
+    *   **With Node.js:** If you have Node.js, you can use `http-server`:
+        (如果你安装了 Node.js，可以安装并使用 `http-server`：)
         ```bash
         npx http-server
         ```
 
-    *   **使用 VS Code 插件 / Using a VS Code Extension**:
-        安装 [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) 插件，然后右键点击 `index.html` 并选择 "Open with Live Server"。
-        <br>
-        *Install the [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) extension, then right-click on `index.html` and select "Open with Live Server".*
+    *   **With VS Code:** Install the [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) extension. Right-click on `index.html` and choose "Open with Live Server".
+        (如果你使用 Visual Studio Code，可以安装 [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) 插件，然后右键点击 `index.html` 并选择 "Open with Live Server"。)
 
-4.  **在浏览器中打开 / Open in your browser**
-    访问服务器提供的地址（通常是 `http://localhost:8000`）。
-    <br>
-    *Visit the address provided by the server (usually `http://localhost:8000`).*
+4.  **Open in your browser (在浏览器中打开)**
+    Visit the local address provided by the server (usually `http://localhost:8000`).
+    (访问服务器提供的地址，通常是 `http://localhost:8000`。)
 
-## 🤝 贡献 / Contributing
+## 🤝 Contributing (贡献)
 
+Contributions are welcome! If you have suggestions or find a bug, please feel free to open an [Issue](https://github.com/fisherv2023/munsell-3d-viewer/issues).
 欢迎任何形式的贡献！如果你有任何建议或发现 Bug，请随时提交 [Issue](https://github.com/fisherv2023/munsell-3d-viewer/issues)。
-<br>
-*Contributions of any kind are welcome! If you have any suggestions or find a bug, please feel free to open an [Issue](https://github.com/fisherv2023/munsell-3d-viewer/issues).*
 
-## 📜 开源协议 / License
+## 📜 License (开源协议)
 
+This project is licensed under the [MIT License](./LICENSE).
 本项目采用 [MIT License](./LICENSE) 开源协议。
-<br>
-*This project is licensed under the MIT License.*
 
-## ❤️ 致谢 / Acknowledgments
+## ❤️ Acknowledgments (致谢)
 
-本项目由 **沈阳艺贝少儿美术教育** 开发。<br>
-*Developed by Shenyang Yibei Children's Art Education.*
+Developed by **Shenyang Yibei Children's Art Education**.
+本项目由 **沈阳艺贝少儿美术教育** 开发。
