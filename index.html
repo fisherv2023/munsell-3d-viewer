@@ -17,40 +17,54 @@
 <body>
   <canvas id="canvas3d"></canvas>
 
-  <!-- 确保这些CDN链接可以访问 -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.min.js"></script>
+  <!-- 
+    1. 使用 importmap 来告诉浏览器 "three" 和 "three/addons/" 在哪里可以找到。
+       这使得我们的 import 语句更简洁。
+  -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
 
-  <script>
-    // 1. 场景、相机和渲染器设置
+  <!-- 
+    2. 主脚本的类型改为 "module"。
+       这允许我们使用 import 语句。
+  -->
+  <script type="module">
+    // 3. 从 'three' 和 'three/addons/' 导入我们需要的模块
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // 场景、相机和渲染器设置 (这部分代码基本不变)
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 15, 60); // 调整相机初始位置以便更好地观察
+    camera.position.set(0, 15, 60);
 
     const canvas = document.getElementById('canvas3d');
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio); // 适配高分屏
+    renderer.setPixelRatio(window.devicePixelRatio);
 
-    // 2. 控制器
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    // 控制器 (注意：因为我们直接导入了 OrbitControls，所以这里不再需要 THREE. 前缀)
+    const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
     controls.rotateSpeed = 0.5;
-    controls.minDistance = 10; // 设置最小缩放距离
-    controls.maxDistance = 200; // 设置最大缩放距离
+    controls.minDistance = 10;
+    controls.maxDistance = 200;
 
-    // 3. 光照
+    // 光照
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
     const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
     dirLight.position.set(20, 40, 30);
     scene.add(ambientLight, dirLight);
 
-    // 4. 孟塞尔数据
-    // 注意：这里的色相减少到了5个主要色相，数据也是简化的示意
+    // 孟塞尔数据
     const hueLabels = ['5R', '5Y', '5G', '5B', '5P'];
-    // 每个色相在不同明度(Value)下的最大彩度(Chroma)
-    // 索引 0-9 对应明度 1-10
     const chromaMap = {
         '5R': [2, 5, 8, 10, 12, 12, 10, 8, 6, 4],
         '5Y': [1, 3, 6, 9, 11, 12, 13, 12, 10, 8],
@@ -59,10 +73,10 @@
         '5P': [2, 4, 7, 9, 10, 9, 8, 6, 4, 2],
     };
 
-    // 5. 创建色立体
+    // 创建色立体
     const sphereRadius = 0.5;
-    const radiusScale = 1.8; // 彩度(Chroma)到3D半径的缩放
-    const heightScale = 2.2; // 明度(Value)到3D高度(Y轴)的缩放
+    const radiusScale = 1.8;
+    const heightScale = 2.2;
 
     hueLabels.forEach((label, hIdx) => {
       const angle = (hIdx / hueLabels.length) * 2 * Math.PI;
@@ -71,20 +85,17 @@
       for (let v = 1; v <= 10; v++) {
         const maxC = chromaData[v - 1] || 0;
         for (let c = 1; c <= maxC; c++) {
-          // 位置 (圆柱坐标系)
           const r = c * radiusScale;
           const x = r * Math.cos(angle);
           const z = r * Math.sin(angle);
           const y = (v - 5.5) * heightScale;
 
-          // 颜色 (使用HSL近似)
           const hueDeg = (hIdx / hueLabels.length) * 360;
-          const saturation = Math.min(1, 0.3 + c * 0.07); // 随彩度增加饱和度
-          const lightness = v / 10.5; // 随明度增加亮度
+          const saturation = Math.min(1, 0.3 + c * 0.07);
+          const lightness = v / 10.5;
 
           const color = new THREE.Color().setHSL(hueDeg / 360, saturation, lightness);
 
-          // 创建小球
           const geometry = new THREE.SphereGeometry(sphereRadius, 16, 16);
           const material = new THREE.MeshStandardMaterial({ color, roughness: 0.7 });
           const sphere = new THREE.Mesh(geometry, material);
@@ -94,24 +105,23 @@
       }
     });
 
-    // 添加中性轴（作为参考）
+    // 添加中性轴
     const axisHeight = 10 * heightScale;
     const neutralAxisGeom = new THREE.CylinderGeometry(0.25, 0.25, axisHeight, 12);
     const neutralAxisMat = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.9 });
     const neutralAxis = new THREE.Mesh(neutralAxisGeom, neutralAxisMat);
-    // 将轴心与色球对齐
     neutralAxis.position.y = (5.5 - 5.5) * heightScale;
     scene.add(neutralAxis);
 
-    // 6. 动画循环
+    // 动画循环
     function animate() {
       requestAnimationFrame(animate);
-      controls.update(); // 必须在循环中更新控制器
+      controls.update();
       renderer.render(scene, camera);
     }
     animate();
 
-    // 7. 窗口自适应
+    // 窗口自适应
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
