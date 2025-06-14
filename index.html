@@ -1,37 +1,99 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>孟塞尔色立体模型 (Munsell Color Solid)</title>
+  <title>Munsell Color Solid</title>
   <style>
     body {
       margin: 0;
       overflow: hidden;
-      /* 2. 将背景改为深灰色 */
       background-color: #222222;
     }
     canvas {
       display: block;
     }
-    /* 3. 为版权信息添加样式 */
-    #copyright {
+    .footer-container {
+      /* 新增：一个容器来包裹开关和版权信息 */
       position: absolute;
-      bottom: 15px;
+      bottom: 0;
+      left: 0;
       width: 100%;
-      text-align: center;
-      color: #aaaaaa; /* 浅灰色文字，在深色背景上清晰可见 */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: 15px;
+      box-sizing: border-box;
+      pointer-events: none; /* 默认让容器不接收鼠标事件 */
+    }
+    /* --- 新增：光源开关的样式 --- */
+    .light-switch-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      pointer-events: all; /* 单独让开关可以接收鼠标事件 */
+      cursor: pointer;
+      user-select: none; /* 防止用户选中文字 */
+      background-color: rgba(60, 60, 60, 0.7);
+      padding: 5px;
+      border-radius: 20px;
+    }
+    .light-switch-container span {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       font-size: 14px;
-      pointer-events: none; /* 让鼠标可以穿透文字，不影响3D操作 */
+      color: #ccc;
+      padding: 5px 10px;
+    }
+    .light-switch {
+      width: 44px;
+      height: 24px;
+      background-color: #555;
+      border-radius: 12px;
+      position: relative;
+      transition: background-color 0.3s ease;
+    }
+    .light-switch-handle {
+      width: 20px;
+      height: 20px;
+      background-color: white;
+      border-radius: 50%;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.3s ease;
+    }
+    /* 开关激活时的状态 */
+    .light-switch-container.active .light-switch {
+      background-color: #4CAF50; /* 激活时用绿色 */
+    }
+    .light-switch-container.active .light-switch-handle {
+      transform: translateX(20px);
+    }
+    #copyright {
+      width: 100%;
+      text-align: center;
+      color: #aaaaaa;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
   <canvas id="canvas3d"></canvas>
 
-  <!-- 版权信息元素 -->
-  <div id="copyright">
-    本项目由沈阳艺贝少儿美术教育开发
+  <!-- 新增：将底部元素包裹在一个容器中 -->
+  <div class="footer-container">
+    <!-- 新增：光源开关的HTML结构 -->
+    <div class="light-switch-container active" id="lightSwitch">
+      <span>Flat</span>
+      <div class="light-switch">
+        <div class="light-switch-handle"></div>
+      </div>
+      <span>3D</span>
+    </div>
+
+    <div id="copyright">
+      Developed by Shenyang Yibei Children's Art Education.
+    </div>
   </div>
 
   <script type="importmap">
@@ -47,34 +109,32 @@
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-    // 场景、相机和渲染器设置
+    // --- 场景、相机、渲染器等设置 (保持不变) ---
     const scene = new THREE.Scene();
-    // 2. 同时设置场景的背景色，与CSS保持一致
     scene.background = new THREE.Color(0x222222);
-
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.set(0, 15, 60);
-
     const canvas = document.getElementById('canvas3d');
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
-
-    // 控制器
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controls.rotateSpeed = 0.5;
-    controls.minDistance = 10;
-    controls.maxDistance = 200;
 
-    // 光照
+    // --- 光照 (保持不变，但我们会控制它们的可见性) ---
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
     const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
     dirLight.position.set(20, 40, 30);
     scene.add(ambientLight, dirLight);
 
-    // 孟塞尔数据 (保持不变)
+    // --- 孟塞尔数据与色立体创建 ---
+    const sphereRadius = 0.5;
+    const radiusScale = 1.8;
+    const heightScale = 2.2;
+
+    // 新增：创建一个数组来存储所有的小球材质，方便后续切换
+    const sphereMaterials = [];
+
     const hueLabels = ['5R', '5Y', '5G', '5B', '5P'];
     const chromaMap = {
         '5R': [2, 5, 8, 10, 12, 12, 10, 8, 6, 4],
@@ -84,15 +144,9 @@
         '5P': [2, 4, 7, 9, 10, 9, 8, 6, 4, 2],
     };
 
-    // 创建色立体 (保持不变)
-    const sphereRadius = 0.5;
-    const radiusScale = 1.8;
-    const heightScale = 2.2;
-
     hueLabels.forEach((label, hIdx) => {
       const angle = (hIdx / hueLabels.length) * 2 * Math.PI;
       const chromaData = chromaMap[label];
-
       for (let v = 1; v <= 10; v++) {
         const maxC = chromaData[v - 1] || 0;
         for (let c = 1; c <= maxC; c++) {
@@ -100,47 +154,78 @@
           const x = r * Math.cos(angle);
           const z = r * Math.sin(angle);
           const y = (v - 5.5) * heightScale;
-
           const hueDeg = (hIdx / hueLabels.length) * 360;
           const saturation = Math.min(1, 0.3 + c * 0.07);
           const lightness = v / 10.5;
-
           const color = new THREE.Color().setHSL(hueDeg / 360, saturation, lightness);
 
           const geometry = new THREE.SphereGeometry(sphereRadius, 16, 16);
-          const material = new THREE.MeshStandardMaterial({ color, roughness: 0.7 });
-          const sphere = new THREE.Mesh(geometry, material);
+          // 修改：使用两种材质，一种受光，一种不受光
+          const standardMaterial = new THREE.MeshStandardMaterial({ color, roughness: 0.7 });
+          const basicMaterial = new THREE.MeshBasicMaterial({ color });
+          
+          const sphere = new THREE.Mesh(geometry, standardMaterial); // 默认使用受光材质
           sphere.position.set(x, y, z);
+
+          // 新增：将两种材质和球体本身存起来，方便切换
+          sphere.userData.standardMaterial = standardMaterial;
+          sphere.userData.basicMaterial = basicMaterial;
+
           scene.add(sphere);
         }
       }
     });
 
-    // 1. 修改中性轴，添加从黑到白的渐变
+    // --- 中性轴 (保持不变) ---
     const axisHeight = 10 * heightScale;
     const neutralAxisGeom = new THREE.CylinderGeometry(0.25, 0.25, axisHeight, 12);
-    
-    // 创建顶点色
     const positionAttribute = neutralAxisGeom.getAttribute('position');
     const colors = [];
     const color = new THREE.Color();
     for (let i = 0; i < positionAttribute.count; i++) {
-        // 根据顶点的高度 (y值) 计算灰度值 (0到1)
         const lightness = (positionAttribute.getY(i) + axisHeight / 2) / axisHeight;
         color.setHSL(0, 0, lightness);
         colors.push(color.r, color.g, color.b);
     }
-    // 将计算出的颜色应用到几何体上
     neutralAxisGeom.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-    
-    // 创建材质时，启用顶点色
     const neutralAxisMat = new THREE.MeshStandardMaterial({ roughness: 0.9, vertexColors: true });
-    
     const neutralAxis = new THREE.Mesh(neutralAxisGeom, neutralAxisMat);
-    neutralAxis.position.y = (5.5 - 5.5) * heightScale;
     scene.add(neutralAxis);
 
-    // 动画循环
+    // --- 新增：光源开关的逻辑 ---
+    const lightSwitch = document.getElementById('lightSwitch');
+    let isLightingEnabled = true; // 默认开启光源
+
+    // 新增一个函数来切换所有球体的材质
+    function toggleMaterials(useStandard) {
+        scene.traverse((object) => {
+            if (object.isMesh && object.userData.standardMaterial) {
+                object.material = useStandard ? object.userData.standardMaterial : object.userData.basicMaterial;
+            }
+        });
+    }
+
+    lightSwitch.addEventListener('click', () => {
+        isLightingEnabled = !isLightingEnabled;
+        
+        // 切换光源和中性轴的可见性
+        dirLight.visible = isLightingEnabled;
+        ambientLight.visible = isLightingEnabled;
+        neutralAxis.visible = isLightingEnabled; // 中性轴也一起显示/隐藏
+
+        // 切换所有小球的材质
+        toggleMaterials(isLightingEnabled);
+
+        // 切换开关的UI样式
+        if (isLightingEnabled) {
+            lightSwitch.classList.add('active');
+        } else {
+            lightSwitch.classList.remove('active');
+        }
+    });
+
+
+    // --- 动画与自适应 (保持不变) ---
     function animate() {
       requestAnimationFrame(animate);
       controls.update();
@@ -148,7 +233,6 @@
     }
     animate();
 
-    // 窗口自适应
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
